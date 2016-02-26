@@ -24,11 +24,11 @@ def parse_arguments():
     return vars(ap.parse_args())
 
 
-def addJob(id, v, scheduler):
-    conn = ssh_client(v['host'], v['user'], v['pass'])
+def addJob(task, scheduler):
+    conn = ssh_client(task.host, task.user, task.passwd)
     session = SshSession(conn, auto_close=False)
-    task = importTask(v['task'], session)
-    scheduler.add_job(task.execute, 'interval', seconds=v['interval'], id=id)
+    t = importTask(task.task, session)
+    scheduler.add_job(t.execute, 'interval', seconds=task.interval, id=task.id)
 
 
 def main(args):
@@ -40,8 +40,8 @@ def main(args):
     taskparser.parse()
 
     # Initial parsing of the task folder
-    for id, v in taskparser.task_dict.iteritems():
-        addJob(id, v, scheduler)
+    for t in taskparser.task_list:
+        addJob(t, scheduler)
 
     scheduler.start()
     # Update jobs while running
@@ -51,7 +51,7 @@ def main(args):
 
             # Check the folder to see if job list changed
             taskparser.parse()
-            tasks_list = set([id for id in taskparser.task_dict])
+            tasks_list = set([t.id for t in taskparser.task_list])
 
             # Get scheduler current job list
             jobs = scheduler.get_jobs()
@@ -65,7 +65,8 @@ def main(args):
                 # We got a new task
                 if id not in jobs_list:
                     print 'Added ', id
-                    addJob(id, taskparser.task_dict[id])
+                    task = filter(lambda x: x.id == id, taskparser.task_list)
+                    addJob(task, scheduler)
 
                 # Task has been removed
                 if id not in tasks_list:
