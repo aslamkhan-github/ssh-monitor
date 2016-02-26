@@ -2,19 +2,26 @@
 
 import time
 import datetime
+import argparse
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from task_parser import TaskParser
 
 
 def job_function():
-    global n
-    print 'schedule delta:', datetime.datetime.now()
+    print 'schedule time:', datetime.datetime.now()
 
 
-def main():
+def parse_arguments():
+    ap = argparse.ArgumentParser()
+    ap.add_argument('-f', required=True, help='Task folder to be watched')
+    return vars(ap.parse_args())
+
+
+def main(args):
 
     scheduler = BackgroundScheduler()
-    taskparser = TaskParser('/home/elwiss/dev/collectd_task')
+    taskparser = TaskParser(args['f'])
     taskparser.parse()
 
     # Initial parsing of the task folder
@@ -43,7 +50,7 @@ def main():
             for task in difference:
                 # We got a new task
                 if task not in jobs_list:
-                    print 'Adding ', task
+                    print 'Added ', task
                     scheduler.add_job(
                         job_function, 'interval',
                         seconds=taskparser.task_dict[task]['interval'],
@@ -51,7 +58,7 @@ def main():
 
                 # Task has been removed
                 if task not in tasks_list:
-                    print 'Removing ', task
+                    print 'Removed ', task
                     scheduler.remove_job(task)
 
         except KeyboardInterrupt:
@@ -60,4 +67,4 @@ def main():
     scheduler.shutdown()
 
 if __name__ == '__main__':
-    main()
+    main(parse_arguments())
