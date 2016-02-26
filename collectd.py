@@ -1,15 +1,21 @@
 #!/bin/python
 
 import time
-import datetime
 import argparse
+from importlib import import_module
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from task_parser import TaskParser
+from rcontrol.ssh import SshSession, ssh_client
+
+HOST = '10.102.22.29'
+PORT = 8125
 
 
-def job_function():
-    print 'schedule time:', datetime.datetime.now()
+def importTask(class_name, session):
+    global HOST, PORT
+    MyClass = getattr(import_module('task.' + class_name), class_name)
+    return MyClass(HOST, PORT, session)
 
 
 def parse_arguments():
@@ -18,16 +24,24 @@ def parse_arguments():
     return vars(ap.parse_args())
 
 
+def addJob(id, v, scheduler):
+    conn = ssh_client(v['host'], v['user'], v['pass'])
+    session = SshSession(conn, auto_close=False)
+    task = importTask(v['task'], session)
+    scheduler.add_job(task.execute, 'interval', seconds=v['interval'], id=id)
+
+
 def main(args):
 
+    import pdb
+    pdb.set_trace()
     scheduler = BackgroundScheduler()
     taskparser = TaskParser(args['f'])
     taskparser.parse()
 
     # Initial parsing of the task folder
-    for id, value in taskparser.task_dict.iteritems():
-        scheduler.add_job(job_function, 'interval',
-                          seconds=value['interval'], id=id)
+    for id, v in taskparser.task_dict.iteritems():
+        addJob(id, v, scheduler)
 
     scheduler.start()
     # Update jobs while running
@@ -47,19 +61,16 @@ def main(args):
             difference = jobs_list ^ tasks_list
 
             # Add or remove accordingly
-            for task in difference:
+            for id in difference:
                 # We got a new task
-                if task not in jobs_list:
-                    print 'Added ', task
-                    scheduler.add_job(
-                        job_function, 'interval',
-                        seconds=taskparser.task_dict[task]['interval'],
-                        id=task)
+                if id not in jobs_list:
+                    print 'Added ', id
+                    addJob(id, taskparser.task_dict[id])
 
                 # Task has been removed
-                if task not in tasks_list:
-                    print 'Removed ', task
-                    scheduler.remove_job(task)
+                if id not in tasks_list:
+                    print 'Removed ', id
+                    scheduler.remove_job(id)
 
         except KeyboardInterrupt:
             break
