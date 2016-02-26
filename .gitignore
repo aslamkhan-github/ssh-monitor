@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Project specific
+*.ropeproject
+venv/
+
 # C extensions
 *.so
 
