@@ -1,5 +1,6 @@
 #!/bin/python
 
+import logging
 import time
 import argparse
 from importlib import import_module
@@ -11,9 +12,11 @@ from rcontrol.ssh import SshSession, ssh_client
 HOST = '10.102.22.29'
 PORT = 8125
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('ssh-monitor')
+
 
 def importTask(class_name, session):
-    global HOST, PORT
     MyClass = getattr(import_module('task.' + class_name), class_name)
     return MyClass(HOST, PORT, session)
 
@@ -25,16 +28,20 @@ def parse_arguments():
 
 
 def addJob(task, scheduler):
-    conn = ssh_client(task.host, task.user, task.passwd)
+    try:
+        conn = ssh_client(task.host, task.user, task.passwd)
+    except:
+        logger.warning('Could not connect to: %s', task.host)
+        return
+
     session = SshSession(conn, auto_close=False)
     t = importTask(task.task, session)
     scheduler.add_job(t.execute, 'interval', seconds=task.interval, id=task.id)
+    logger.info("Added task: %s", id)
 
 
 def main(args):
 
-    import pdb
-    pdb.set_trace()
     scheduler = BackgroundScheduler()
     taskparser = TaskParser(args['f'])
     taskparser.parse()
@@ -54,8 +61,7 @@ def main(args):
             tasks_list = set([t.id for t in taskparser.task_list])
 
             # Get scheduler current job list
-            jobs = scheduler.get_jobs()
-            jobs_list = set([job.id for job in jobs])
+            jobs_list = set([job.id for job in scheduler.get_jobs()])
 
             # Find the difference between two
             difference = jobs_list ^ tasks_list
@@ -64,14 +70,14 @@ def main(args):
             for id in difference:
                 # We got a new task
                 if id not in jobs_list:
-                    print 'Added ', id
                     task = filter(lambda x: x.id == id, taskparser.task_list)
-                    addJob(task, scheduler)
+                    assert(len(task) == 1)
+                    addJob(task[0], scheduler)
 
                 # Task has been removed
                 if id not in tasks_list:
-                    print 'Removed ', id
                     scheduler.remove_job(id)
+                    logger.info("Removed task: %s", id)
 
         except KeyboardInterrupt:
             break
