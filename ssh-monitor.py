@@ -16,9 +16,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('ssh-monitor')
 
 
-def importTask(class_name, session):
-    MyClass = getattr(import_module('task.' + class_name), class_name)
-    return MyClass(HOST, PORT, session)
+def createClass(task, session):
+    import pdb; pdb.set_trace()
+    MyClass = getattr(import_module('task.' + task.task), task.task)
+    return MyClass(task, session)
 
 
 def parse_arguments():
@@ -35,13 +36,14 @@ def addJob(task, scheduler):
         return
 
     session = SshSession(conn, auto_close=False)
-    t = importTask(task.task, session)
+    t = createClass(task, session)
     scheduler.add_job(t.execute, 'interval', seconds=task.interval, id=task.id)
     logger.info("Added task: %s", id)
 
 
 def main(args):
-
+    import pdb
+    pdb.set_trace()
     scheduler = BackgroundScheduler()
     taskparser = TaskParser(args['f'])
     taskparser.parse()

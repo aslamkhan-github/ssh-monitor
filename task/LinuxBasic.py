@@ -1,5 +1,8 @@
-import socket
 import logging
+
+import LinuxCpuAverage
+import LinuxMemoryUsage
+import LinuxDiskUsage
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -7,16 +10,16 @@ logger = logging.getLogger(__name__)
 
 class LinuxBasic:
 
-    def __init__(self, host, port, session):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.host = host
-        self.port = port
-        self.n = 0
-
-    def on_output(self, task, line):
-        logger.info('%d - Received: %s', self.n, line)
-        self.n += 1
+    def __init__(self, task, session):
+        path = task.path + 'os.linux'
+        self.cpu = LinuxCpuAverage.LinuxCpuAverage(task.db_host, task.db_port,
+                                                   session, path)
+        self.mem = LinuxMemoryUsage.LinuxMemoryUsage(task.db_host, task.db_port,
+                                                     session, path)
+        self.disk = LinuxDiskUsage.LinuxDiskUsage(task.db_host, task.db_port,
+                                                  session, path, task.disks)
 
     def execute(self):
-        self.session.execute('uptime', on_stdout=self.on_output)
-        self.session.execute('uptime', on_stdout=self.on_output)
+        self.cpu.execute()
+        self.mem.execute()
+        self.disk.execute()

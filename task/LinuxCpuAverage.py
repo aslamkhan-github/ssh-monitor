@@ -1,0 +1,25 @@
+import logging
+import socket
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+class LinuxCpuAverage:
+
+    def __init__(self, host, port, session, path):
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.destination = (host, port)
+        self.session = session
+        self.path = path
+
+    def on_output(self, task, line):
+        out = line.split()
+        msg = '{}:{}|g\n'.format(self.path + '.cpu_average.1min', out[-3])
+        msg += '{}:{}|g\n'.format(self.path + '.cpu_average.5min', out[-2])
+        msg += '{}:{}|g'.format(self.path + '.cpu_average.15min', out[-1])
+        # self.sock.sendto(msg, self.destination)
+        logger.info('Sent: %s', msg)
+
+    def execute(self):
+        self.session.execute('uptime', on_stdout=self.on_output)
