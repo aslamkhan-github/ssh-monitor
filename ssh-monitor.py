@@ -14,10 +14,10 @@ PORT = 8125
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('ssh-monitor')
+logging.getLogger('apscheduler').propagate = False
 
 
 def createClass(task, session):
-    import pdb; pdb.set_trace()
     MyClass = getattr(import_module('task.' + task.task), task.task)
     return MyClass(task, session)
 
@@ -42,8 +42,6 @@ def addJob(task, scheduler):
 
 
 def main(args):
-    import pdb
-    pdb.set_trace()
     scheduler = BackgroundScheduler()
     taskparser = TaskParser(args['f'])
     taskparser.parse()

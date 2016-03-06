@@ -1,0 +1,17 @@
+# Target information
+host: 192.168.0.41
+user: elwiss
+pass: dspin900
+
+# Task information
+task: LinuxBasic
+path: server.home
+interval: 5
+disks: 
+    - sda
+
+# Destination information
+db_host: localhost 
+db_port: 8125
+
+

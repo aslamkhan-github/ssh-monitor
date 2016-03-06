@@ -1,7 +1,8 @@
 import logging
 import socket
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -18,7 +19,7 @@ class LinuxMemoryUsage:
         msg = '{}:{}|g\n'.format(self.path + '.memory.free', out[-1])
         msg += '{}:{}|g'.format(self.path + '.memory.used', out[-2])
         # self.sock.sendto(msg, self.destination)
-        logger.info('Sent: %s', msg)
+        logger.info('Sent:\n%s', msg)
 
     def execute(self):
         self.session.execute('free -m | grep +', on_stdout=self.on_output)

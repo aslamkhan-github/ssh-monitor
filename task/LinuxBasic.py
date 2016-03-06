@@ -4,7 +4,8 @@ import LinuxCpuAverage
 import LinuxMemoryUsage
 import LinuxDiskUsage
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 

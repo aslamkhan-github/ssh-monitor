@@ -1,7 +1,13 @@
 import unittest
+import logging
 import yaml
+import sys
+
 from os import listdir, path
 from os.path import isfile, join
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('ssh-monitor')
 
 
 class Task:
@@ -49,15 +55,20 @@ class TaskParser:
 
     def createTask(self, id, v):
         t = Task(id)
-        t.host = v['host']
-        t.user = v['user']
-        t.task = v['task']
-        t.passwd = v['pass']
-        t.interval = v['interval']
-        t.disks = list(v['disks'])
-        t.db_host = v['db_host']
-        t.db_port = v['db_port']
-        t.path = v['path']
+        try:
+            t.host = v['host']
+            t.user = v['user']
+            t.task = v['task']
+            t.passwd = v['pass']
+            t.interval = v['interval']
+            t.disks = list(v['disks'])
+            t.db_host = v['db_host']
+            t.db_port = v['db_port']
+            t.path = v['path']
+        except:
+            logger.exception('Invalid file format in %s', id)
+            sys.exit(1)
+
         return t
 
 

@@ -1,7 +1,8 @@
 import logging
 import socket
 
-logging.basicConfig(level=logging.INFO)
+# logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -19,7 +20,7 @@ class LinuxCpuAverage:
         msg += '{}:{}|g\n'.format(self.path + '.cpu_average.5min', out[-2])
         msg += '{}:{}|g'.format(self.path + '.cpu_average.15min', out[-1])
         # self.sock.sendto(msg, self.destination)
-        logger.info('Sent: %s', msg)
+        logger.info('Sent:\n%s', msg)
 
     def execute(self):
         self.session.execute('uptime', on_stdout=self.on_output)
