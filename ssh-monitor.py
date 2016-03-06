@@ -13,8 +13,9 @@ HOST = '10.102.22.29'
 PORT = 8125
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('ssh-monitor')
-logging.getLogger('apscheduler').propagate = False
+logger = logging.getLogger('ssh-manager')
+# Set main logging level
+logging.getLogger().setLevel(logging.INFO)
 
 
 def createClass(task, session):
