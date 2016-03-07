@@ -1,14 +1,15 @@
 # Target information
-host: 192.168.0.41
-user: elwiss
-pass: dspin900
+host: 10.102.22.28
+user: abb
+pass: ABBbomem 
 
 # Task information
 task: LinuxBasic
-path: server.home
-interval: 5
+path: server.kallithea
+interval: 10
 disks: 
     - sda
+    - sdb
 
 # Destination information
 db_host: localhost 

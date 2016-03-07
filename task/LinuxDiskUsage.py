@@ -16,15 +16,17 @@ class LinuxDiskUsage:
         self.disks = disks
 
     def on_output(self, task, line):
+        if 'Permission denied' in line:
+            return
         out = line.split()
         disk_name = out[0].split('/')[2]
-        path = self.path + 'disk.' + disk_name
-        msg = '{}:{}|g\n'.format(path + '.size', out[1].replace('M', ''))
-        msg += '{}:{}|g\n'.format(path + '.used', out[2].replace('M', ''))
-        msg += '{}:{}|g\n'.format(path + '.available', out[3].replace('M', ''))
-        msg += '{}:{}|g'.format(path + '.used_percent',
-                                out[4].replace('M', '').replace('%',''))
-        # self.sock.sendto(msg, self.destination)
+        path = self.path + '.disk.' + disk_name
+        msg = '{}:{}|c\n'.format(path + '.size', out[1].replace('M', ''))
+        msg += '{}:{}|c\n'.format(path + '.used', out[2].replace('M', ''))
+        msg += '{}:{}|c\n'.format(path + '.available', out[3].replace('M', ''))
+        msg += '{}:{}|c'.format(path + '.used_percent',
+                                out[4].replace('M', '').replace('%', ''))
+        self.sock.sendto(msg, self.destination)
         logger.info('Sent:\n%s', msg)
 
     def execute(self):

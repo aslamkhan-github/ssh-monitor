@@ -16,10 +16,12 @@ class LinuxCpuAverage:
 
     def on_output(self, task, line):
         out = line.split()
-        msg = '{}:{}|g\n'.format(self.path + '.cpu_average.1min', out[-3])
-        msg += '{}:{}|g\n'.format(self.path + '.cpu_average.5min', out[-2])
-        msg += '{}:{}|g'.format(self.path + '.cpu_average.15min', out[-1])
-        # self.sock.sendto(msg, self.destination)
+        msg = '{}:{}|c\n'.format(
+            self.path + '.cpu_average.1min', out[-3].replace(',', ''))
+        msg += '{}:{}|c\n'.format(self.path + '.cpu_average.5min',
+                                  out[-2].replace(',', ''))
+        msg += '{}:{}|c'.format(self.path + '.cpu_average.15min', out[-1])
+        self.sock.sendto(msg, self.destination)
         logger.info('Sent:\n%s', msg)
 
     def execute(self):
