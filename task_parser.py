@@ -4,7 +4,7 @@ import yaml
 import sys
 
 from os import listdir, path
-from os.path import isfile, join
+from os.path import isfile, join, basename
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('ssh-monitor')
@@ -49,12 +49,14 @@ class TaskParser:
         file_list = [join(self.dir, f)
                      for f in listdir(self.dir) if isfile(join(self.dir, f))]
         for f in file_list:
+            if '.yml' not in f:
+                continue
             with open(f, 'r') as stream:
                 v = yaml.load(stream)
                 self.task_list.append(self.createTask(f, v))
 
     def createTask(self, id, v):
-        t = Task(id)
+        t = Task(basename(id).replace('.yml', ''))
         try:
             t.host = v['host']
             t.user = v['user']
