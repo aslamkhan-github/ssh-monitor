@@ -36,7 +36,11 @@ def addJob(task, scheduler):
         logger.warning('Could not connect to: %s', task.host)
         return
 
-    session = SshSession(conn, auto_close=False)
+    try:
+        session = SshSession(conn, auto_close=False)
+    except:
+        logger.warning('SshSession error: %s', task.host)
+
     t = createClass(task, session)
     scheduler.add_job(t.execute, 'interval', seconds=task.interval, id=task.id)
     logger.info("Added task: %s", id)
