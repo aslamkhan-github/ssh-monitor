@@ -11,3 +11,8 @@ def index():
     taskparser = TaskParser(TASK_DIR)
     taskparser.parse()
     return render_template('index.html', task_list=taskparser.task_list)
+
+
+@app.route('/index/<id>')
+def delete(id):
+    print 'deleting ' + id
