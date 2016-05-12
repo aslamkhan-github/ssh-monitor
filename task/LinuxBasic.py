@@ -11,14 +11,11 @@ logger = logging.getLogger(__name__)
 
 class LinuxBasic:
 
-    def __init__(self, task, session):
-        path = task.path + '.os.linux'
-        self.cpu = LinuxCpuAverage.LinuxCpuAverage(task.db_host, task.db_port,
-                                                   session, path)
-        self.mem = LinuxMemoryUsage.LinuxMemoryUsage(task.db_host, task.db_port,
-                                                     session, path)
-        self.disk = LinuxDiskUsage.LinuxDiskUsage(task.db_host, task.db_port,
-                                                  session, path, task.disks)
+    def __init__(self, task):
+        task.path = task.path + '.os.linux'
+        self.cpu = LinuxCpuAverage.LinuxCpuAverage(task)
+        self.mem = LinuxMemoryUsage.LinuxMemoryUsage(task)
+        self.disk = LinuxDiskUsage.LinuxDiskUsage(task)
 
     def execute(self):
         self.cpu.execute()

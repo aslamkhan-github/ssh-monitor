@@ -1,6 +1,8 @@
 import logging
 import socket
 
+from SShUtil import CreateSshSession
+
 # logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
@@ -8,11 +10,11 @@ logger = logging.getLogger(__name__)
 
 class ICEMemoryUsage:
 
-    def __init__(self, host, port, session, path):
+    def __init__(self, task):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.destination = (host, port)
-        self.session = session
-        self.path = path
+        self.destination = (task.db_host, task.db_port)
+        self.session = CreateSshSession(task)
+        self.path = task.path
 
     def on_output(self, task, line):
         out = line.split()

@@ -11,14 +11,11 @@ logger = logging.getLogger(__name__)
 
 class ICEBasic:
 
-    def __init__(self, task, session):
-        path = task.path + '.os.linux'
-        self.cpu = LinuxCpuAverage.LinuxCpuAverage(task.db_host, task.db_port,
-                                                   session, path)
-        self.mem = ICEMemoryUsage.ICEMemoryUsage(task.db_host, task.db_port,
-                                                 session, path)
-        self.disk = LinuxDiskUsage.LinuxDiskUsage(task.db_host, task.db_port,
-                                                  session, path, task.disks)
+    def __init__(self, task):
+        task.path = task.path + '.os.linux'
+        self.cpu = LinuxCpuAverage.LinuxCpuAverage(task)
+        self.mem = ICEMemoryUsage.ICEMemoryUsage(task)
+        self.disk = LinuxDiskUsage.LinuxDiskUsage(task)
 
     def execute(self):
         self.cpu.execute()
