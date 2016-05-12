@@ -1,4 +1,5 @@
 import logging
+import socket
 
 from rcontrol.ssh import SshSession, ssh_client
 
@@ -20,3 +21,18 @@ def CreateSshSession(task):
         logger.warning('SshSession error: %s', task.host)
 
     return session
+
+def SendGraphitePayload(destination, header, payload):
+    sock = socket.socket()
+    try:
+        sock.connect(destination)
+        sock.sendall(header)
+        sock.sendall(payload)
+    except:
+        logging.error("Could not reach graphite database at: %s",
+                          destination)
+        return False
+
+    return True
+
+

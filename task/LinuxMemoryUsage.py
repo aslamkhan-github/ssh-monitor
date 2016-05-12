@@ -1,7 +1,10 @@
 import logging
 import socket
+import time
+import pickle
+import struct
 
-from SShUtil import CreateSshSession
+from SShUtil import CreateSshSession, SendGraphitePayload
 
 # logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
@@ -17,21 +20,33 @@ class LinuxMemoryUsage:
         self.path = task.path
 
     def on_output(self, task, line):
+        now = int(time.time())
         out = line.split()
-        msg = '{}:{}|c\n'.format(self.path + '.memory.free', out[-1])
-        msg += '{}:{}|c\n'.format(self.path + '.memory.used', out[-2])
+
         total = int(out[-1]) + int(out[-2])
-        msg += '{}:{}|c'.format(self.path + '.memory.total', total)
-        self.sock.sendto(msg, self.destination)
-        logger.info('Sent:\n%s', msg)
+        free = (self.path + '.memory.free', (now, out[-1]))
+        used = (self.path + '.memory.used', (now, out[-2]))
+        total = (self.path + '.memory.used', (now, total))
+
+        payload = pickle.dumps([free, used, total], protocol=2)
+        header = struct.pack("!L", len(payload))
+
+        if SendGraphitePayload(self.destination, header, payload):
+            logger.info('Sent:\n%s', [free, used, total])
 
     def on_swap_output(self, tak, line):
+        now = int(time.time())
         out = line.split()
-        msg = '{}:{}|c\n'.format(self.path + '.memory.swap_free', out[-1])
-        msg += '{}:{}|c\n'.format(self.path + '.memory.swap_used', out[-2])
-        msg += '{}:{}|c'.format(self.path + '.memory.swap_total', out[-3])
-        self.sock.sendto(msg, self.destination)
-        logger.info('Sent:\n%s', msg)
+
+        free = (self.path + '.memory.swap_free', (now, out[-1]))
+        used = (self.path + '.memory.swap_used', (now, out[-2]))
+        total = (self.path + '.memory.swap_total', (now, out[-3]))
+
+        payload = pickle.dumps([free, used, total], protocol=2)
+        header = struct.pack("!L", len(payload))
+
+        if SendGraphitePayload(self.destination, header, payload):
+            logger.info('Sent:\n%s', [free, used, total])
 
     def execute(self):
         self.session.execute('free -m | grep +', on_stdout=self.on_output)

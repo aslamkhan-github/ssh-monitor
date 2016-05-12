@@ -1,7 +1,10 @@
 import logging
 import socket
+import time
+import pickle
+import struct
 
-from SShUtil import CreateSshSession
+from SShUtil import CreateSshSession, SendGraphitePayload
 
 # logging.basicConfig(level=logging.INFO)
 logging.basicConfig(level=logging.WARNING)
@@ -22,16 +25,20 @@ class LinuxDiskUsage:
     def on_output(self, task, line):
         if 'Permission denied' in line:
             return
+        now = int(time.time())
         out = line.split()
+
         disk_name = out[0].split('/')[2]
         path = self.path + '.disk.' + disk_name
-        msg = '{}:{}|c\n'.format(path + '.size', out[1].replace('M', ''))
-        msg += '{}:{}|c\n'.format(path + '.used', out[2].replace('M', ''))
-        msg += '{}:{}|c\n'.format(path + '.available', out[3].replace('M', ''))
-        msg += '{}:{}|c'.format(path + '.used_percent',
-                                out[4].replace('M', '').replace('%', ''))
-        self.sock.sendto(msg, self.destination)
-        logger.info('Sent:\n%s', msg)
+        free = (path + '.free', (now, out[1].replace('M', '')))
+        used = (path + '.used', (now, out[2].replace('M', '')))
+        total = (path + '.available', (now, out[3].replace('M', '')))
+
+        payload = pickle.dumps([free, used, total], protocol=2)
+        header = struct.pack("!L", len(payload))
+
+        if SendGraphitePayload(self.destination, header, payload):
+            logger.info('Sent:\n%s', [free, used, total])
 
     def execute(self):
         for disk in self.disks:
