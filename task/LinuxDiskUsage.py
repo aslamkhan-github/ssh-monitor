@@ -33,12 +33,14 @@ class LinuxDiskUsage:
         free = (path + '.free', (now, out[1].replace('M', '')))
         used = (path + '.used', (now, out[2].replace('M', '')))
         total = (path + '.available', (now, out[3].replace('M', '')))
+        percent = (path + '.used_percent',
+                   (now, out[4].replace('M', '').replace('%', '')))
 
-        payload = pickle.dumps([free, used, total], protocol=2)
+        payload = pickle.dumps([free, used, total, percent], protocol=2)
         header = struct.pack("!L", len(payload))
 
         if SendGraphitePayload(self.destination, header, payload):
-            logger.info('Sent:\n%s', [free, used, total])
+            logger.info('Sent:\n%s', [free, used, total, percent])
 
     def execute(self):
         for disk in self.disks:

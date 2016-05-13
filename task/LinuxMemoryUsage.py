@@ -26,7 +26,7 @@ class LinuxMemoryUsage:
         total = int(out[-1]) + int(out[-2])
         free = (self.path + '.memory.free', (now, out[-1]))
         used = (self.path + '.memory.used', (now, out[-2]))
-        total = (self.path + '.memory.used', (now, total))
+        total = (self.path + '.memory.total', (now, total))
 
         payload = pickle.dumps([free, used, total], protocol=2)
         header = struct.pack("!L", len(payload))

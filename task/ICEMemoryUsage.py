@@ -24,7 +24,7 @@ class ICEMemoryUsage:
         used = int(out[1]) - int(out[-1])
         free = (self.path + '.memory.free', (now, out[-1]))
         used = (self.path + '.memory.used', (now, used))
-        total = (self.path + '.memory.used', (now, out[1]))
+        total = (self.path + '.memory.total', (now, out[1]))
 
         payload = pickle.dumps([free, used, total], protocol=2)
         header = struct.pack("!L", len(payload))
