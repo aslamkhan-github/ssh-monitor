@@ -10,17 +10,18 @@ logger = logging.getLogger(__name__)
 
 def CreateSshSession(task):
     try:
-        conn = ssh_client(task.host, task.user, task.passwd)
+        conn = ssh_client(task.host, task.user, task.passwd, port=task.port)
     except:
         logger.warning('Could not connect to: %s', task.host)
         return
 
     try:
-        session = SshSession(conn, auto_close=False)
+        session = SshSession(conn, auto_close=True)
     except:
         logger.warning('SshSession error: %s', task.host)
 
     return session
+
 
 def SendGraphitePayload(destination, header, payload):
     sock = socket.socket()
@@ -30,9 +31,7 @@ def SendGraphitePayload(destination, header, payload):
         sock.sendall(payload)
     except:
         logging.error("Could not reach graphite database at: %s",
-                          destination)
+                      destination)
         return False
 
     return True
-
-

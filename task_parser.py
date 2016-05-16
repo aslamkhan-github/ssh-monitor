@@ -17,6 +17,7 @@ class Task:
         self.host = ''
         self.user = ''
         self.task = ''
+        self.port = 22
         self.passwd = ''
         self.interval = 0
         self.disks = []
@@ -67,6 +68,8 @@ class TaskParser:
             t.db_host = v['db_host']
             t.db_port = v['db_port']
             t.path = v['path']
+            if 'port' in v:
+                self.port = int(v['port'])
         except:
             logger.exception('Invalid file format in %s', id)
             sys.exit(1)

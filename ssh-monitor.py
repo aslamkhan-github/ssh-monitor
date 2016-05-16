@@ -48,7 +48,12 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
     def on_modified(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
-        self.scheduler.remove_job(id)
+        logger.info("on_modified: %s", id)
+        try:
+            self.scheduler.remove_job(id)
+        except:
+            pass # We don't care if we don't find the task
+
         self.parser.parse()
         task = filter(lambda x: x.id == id, self.parser.task_list)
         if len(task) == 0:
@@ -57,11 +62,13 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
     def on_deleted(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
+        logger.info("on_deleted: %s", id)
         self.scheduler.remove_job(id)
 
     def on_created(self, event):
         self.parser.parse()
         id = os.path.basename(event.src_path).replace('.yml', '')
+        logger.info("on_created: %s", id)
         task = filter(lambda x: x.id == id, self.parser.task_list)
         if len(task) == 0:
             logging.error("Could not find task with ID: %s", id)
@@ -74,7 +81,7 @@ def main(args):
     taskparser = TaskParser(args['f'])
     taskparser.parse()
 
-    yml_handler = YmlFileEventHandler()
+    yml_handler = YmlFileEventHandler(patterns=["*.yml"])
     yml_handler.set_scheduler(scheduler)
     yml_handler.set_parser(taskparser)
     file_observer = Observer()

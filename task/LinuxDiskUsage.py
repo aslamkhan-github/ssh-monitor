@@ -16,11 +16,9 @@ class LinuxDiskUsage:
     def __init__(self, task):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.destination = (task.db_host, task.db_port)
-        self.session = CreateSshSession(task)
-        self.path = task.path
+        self.task = task
         if len(task.disks) == 0:
             logging.error("LinuxDiskUsage: No disk name list provided")
-        self.disks = task.disks
 
     def on_output(self, task, line):
         if 'Permission denied' in line:
@@ -28,8 +26,8 @@ class LinuxDiskUsage:
         now = int(time.time())
         out = line.split()
 
-        disk_name = out[0].split('/')[2]
-        path = self.path + '.disk.' + disk_name
+        disk_name = out[5].replace('/', '_')
+        path = self.task.path + '.disk.' + disk_name
         free = (path + '.free', (now, out[1].replace('M', '')))
         used = (path + '.used', (now, out[2].replace('M', '')))
         total = (path + '.available', (now, out[3].replace('M', '')))
@@ -43,6 +41,7 @@ class LinuxDiskUsage:
             logger.info('Sent:\n%s', [free, used, total, percent])
 
     def execute(self):
-        for disk in self.disks:
-            self.session.execute('df -BM | grep {}'.format(disk),
-                                 on_stdout=self.on_output)
+        session = CreateSshSession(self.task)
+        for disk in self.task.disks:
+            session.execute('df -BM | grep {}'.format(disk),
+                            on_stdout=self.on_output)
