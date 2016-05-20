@@ -1,9 +1,15 @@
 #!/bin/python
 
+# Must configure logging before importing modules as they overwrite config
 import logging
+logging.basicConfig(level=logging.INFO,
+                    format='[%(asctime)s] %(levelname)-8s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+
 import time
 import os
 import argparse
+import traceback
 from importlib import import_module
 
 from watchdog.observers import Observer
@@ -12,13 +18,10 @@ from watchdog.events import PatternMatchingEventHandler
 from apscheduler.schedulers.background import BackgroundScheduler
 from task_parser import TaskParser
 
-HOST = '10.102.22.29'
-PORT = 8125
-
-logging.basicConfig(level=logging.INFO)
+# Lower the modules logging level
+logging.getLogger("paramiko").setLevel(logging.WARNING)
+logging.getLogger("apscheduler").setLevel(logging.WARNING)
 logger = logging.getLogger('ssh-manager')
-# Set main logging level
-logging.getLogger().setLevel(logging.INFO)
 
 
 def createClass(task):
@@ -33,9 +36,16 @@ def parse_arguments():
 
 
 def addJob(task, scheduler):
-    t = createClass(task)
-    scheduler.add_job(t.execute, 'interval', seconds=task.interval, id=task.id)
-    logger.info("Added task: %s", id)
+    try:
+        t = createClass(task)
+        scheduler.add_job(
+            t.execute,
+            'interval',
+            seconds=task.interval,
+            id=task.id)
+        logger.info("Added task: %s - interval: %d", task.id, task.interval)
+    except:
+        logger.error(traceback.format_exc)
 
 
 class YmlFileEventHandler(PatternMatchingEventHandler):
@@ -48,11 +58,11 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
     def on_modified(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("on_modified: %s", id)
+        logger.info("File modified: %s", event.src_path)
         try:
             self.scheduler.remove_job(id)
         except:
-            pass # We don't care if we don't find the task
+            pass  # We don't care if we don't find the task
 
         self.parser.parse()
         task = filter(lambda x: x.id == id, self.parser.task_list)
@@ -62,13 +72,13 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
     def on_deleted(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("on_deleted: %s", id)
+        logger.info("File deleted: %s", event.src_path)
         self.scheduler.remove_job(id)
 
     def on_created(self, event):
         self.parser.parse()
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("on_created: %s", id)
+        logger.info("File added: %s", event.src_path)
         task = filter(lambda x: x.id == id, self.parser.task_list)
         if len(task) == 0:
             logging.error("Could not find task with ID: %s", id)
@@ -76,8 +86,7 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
 
 def main(args):
-    # import pdb; pdb.set_trace()
-    scheduler = BackgroundScheduler()
+    scheduler = BackgroundScheduler(coalesce=True)
     taskparser = TaskParser(args['f'])
     taskparser.parse()
 
