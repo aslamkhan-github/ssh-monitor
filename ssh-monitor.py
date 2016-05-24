@@ -86,7 +86,7 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
 
 def main(args):
-    scheduler = BackgroundScheduler(coalesce=True)
+    scheduler = BackgroundScheduler(coalesce=True, misfire_grace_time=4)
     taskparser = TaskParser(args['f'])
     taskparser.parse()
 
@@ -106,32 +106,6 @@ def main(args):
     while True:
         try:
             time.sleep(15)
-            # Rest of the task changes are handled by YmlFileEventHandler
-            '''
-            # Check the folder to see if job list changed
-            taskparser.parse()
-            tasks_list = set([t.id for t in taskparser.task_list])
-
-            # Get scheduler current job list
-            jobs_list = set([job.id for job in scheduler.get_jobs()])
-
-            # Find the difference between two
-            difference = jobs_list ^ tasks_list
-
-            # Add or remove accordingly
-            for id in difference:
-                # We got a new task
-                if id not in jobs_list:
-                    task = filter(lambda x: x.id == id, taskparser.task_list)
-                    assert(len(task) == 1)
-                    addJob(task[0], scheduler)
-
-                # Task has been removed
-                if id not in tasks_list:
-                    scheduler.remove_job(id)
-                    logger.info("Removed task: %s", id)
-            '''
-
         except KeyboardInterrupt:
             break
 

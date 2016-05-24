@@ -4,14 +4,15 @@ import socket
 from rcontrol.ssh import SshSession, ssh_client
 
 # logging.basicConfig(level=logging.INFO)
-#logging.basicConfig(level=logging.WARN)
+# logging.basicConfig(level=logging.WARN)
 logger = logging.getLogger(__name__)
 
 
 def CreateSshSession(task):
     try:
         conn = ssh_client(task.host, task.user, task.passwd, port=task.port)
-        session = SshSession(conn, auto_close=True)
+        session = SshSession(conn, auto_close=False)
+        logger.info("New SSH session: %s", task.host)
     except:
         logger.error("Could not connect to : %s", task.host)
         return None

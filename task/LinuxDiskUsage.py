@@ -1,10 +1,9 @@
 import logging
-import socket
 import time
 import pickle
 import struct
 import traceback
-
+from datetime import datetime, timedelta
 from SShUtil import CreateSshSession, SendGraphitePayload
 
 # logging.basicConfig(level=logging.INFO)
@@ -15,11 +14,26 @@ logger = logging.getLogger(__name__)
 class LinuxDiskUsage:
 
     def __init__(self, task):
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.destination = (task.db_host, task.db_port)
         self.task = task
         if len(task.disks) == 0:
             logging.error("LinuxDiskUsage: No disk name list provided")
+        self.session = None
+        self.last_connection = None
+
+    def connect(self):
+        # Check if already connected
+        if self.session:
+            # Expire session
+            if datetime.now() - self.last_connection > timedelta(hours=1):
+                self.session.close()
+            else:
+                # Keep session alive
+                return True
+
+        self.session = CreateSshSession(self.task)
+        self.last_connection = datetime.now()
+        return (self.session is not None)
 
     def on_output(self, task, line):
         if 'Permission denied' in line:
@@ -35,7 +49,7 @@ class LinuxDiskUsage:
             used = (path + '.used', (now, out[2].replace('M', '')))
             total = (path + '.available', (now, out[3].replace('M', '')))
             percent = (path + '.used_percent',
-                    (now, out[4].replace('M', '').replace('%', '')))
+                       (now, out[4].replace('M', '').replace('%', '')))
 
             payload = pickle.dumps([free, used, total, percent], protocol=2)
             header = struct.pack("!L", len(payload))
@@ -45,10 +59,16 @@ class LinuxDiskUsage:
         except:
             logger.error(traceback.format_exc)
 
-    def execute(self):
-        session = CreateSshSession(self.task)
-        if not session:
-            return
-        for disk in self.task.disks:
-            session.execute('df -BM | grep {}'.format(disk),
-                            on_stdout=self.on_output)
+    def execute(self, session=None):
+        if session:
+            # use external session
+            for disk in self.task.disks:
+                session.execute('df -BM | grep {}'.format(disk),
+                                     on_stdout=self.on_output)
+        else:
+            # Use our own session
+            if not self.connect():
+                return
+            for disk in self.task.disks:
+                self.session.execute('df -BM | grep {}'.format(disk),
+                                     on_stdout=self.on_output)
