@@ -1,18 +1,28 @@
 from app import app
-from flask import render_template
-from task_parser import TaskParser
+from flask import render_template, redirect, url_for
 
-TASK_DIR = 'task_dir/'
+from forms import TaskForm
+from filemodel import FileModel
 
 
 @app.route('/')
-@app.route('/index')
 def index():
-    taskparser = TaskParser(TASK_DIR)
-    taskparser.parse()
-    return render_template('index.html', task_list=taskparser.task_list)
+    model = FileModel()
+    return render_template('index.html',
+                           task_list=model.get_all_task())
 
 
-@app.route('/index/<id>')
+@app.route('/task')
+def task():
+    model = FileModel()
+    form = TaskForm()
+    return render_template('task.html',
+                           scripts=model.get_all_scripts(),
+                           form=form)
+
+
+@app.route('/delete/<id>')
 def delete(id):
-    print 'deleting ' + id
+    model = FileModel()
+    model.delete(id)
+    return redirect(url_for('index'))

@@ -4,7 +4,7 @@ import yaml
 import sys
 
 from os import listdir, path
-from os.path import isfile, join, basename
+from os.path import join, basename
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('ssh-monitor')
@@ -45,16 +45,21 @@ class TaskParser:
         self.dir = path.abspath(dir)
         self.task_list = []
 
+    def parse_scripts(self, dir):
+        ignore = ['__init__.py', 'SShUtil.py']
+        file_list = [f.replace('.py', '') for f in listdir(dir)
+                     if f.endswith('.py') and f not in ignore]
+        return file_list
+
     def parse(self):
         self.task_list = []
         file_list = [join(self.dir, f)
-                     for f in listdir(self.dir) if isfile(join(self.dir, f))]
+                     for f in listdir(self.dir) if f.endswith('.yml')]
         for f in file_list:
-            if '.yml' not in f:
-                continue
             with open(f, 'r') as stream:
                 v = yaml.load(stream)
                 self.task_list.append(self.createTask(f, v))
+        return self.task_list
 
     def createTask(self, id, v):
         t = Task(basename(id).replace('.yml', ''))
