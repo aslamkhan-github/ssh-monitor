@@ -24,11 +24,11 @@
                 <div class="container-fluid">
                     <!-- Brand and toggle get grouped for better mobile display -->
                     <div class="navbar-header">
-                        <a class="navbar-brand" href="#">ssh-monitor</a>
+                        <a class="navbar-brand" href="/">ssh-monitor</a>
                     </div>
 
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="">Add Task</a></li>
+                        <li><a href="{{ url_for('task') }}">Add Task</a></li>
                     </ul>
                 </div><!-- /.navbar-collapse -->
             </nav>
@@ -43,112 +43,19 @@
                     <div class="col-sm-4">
                         <div class="thumbnail">
                             <a class="close" href="delete/{{task.id}}">×</a>
-                                <a href="task/{{task.id}}" style="color: #333;text-decoration:none">
-                                    <div>
-                                        <h3>{{task.id}}</h3>
-                                        <p>{{task.host}}</p>
-                                    </div>
-                                </a>
+                            <a href="task/{{task.id}}" style="color: #333;text-decoration:none">
+                                <div>
+                                    <h3>{{task.id}}</h3>
+                                    <p>{{task.host}}</p>
+                                </div>
+                            </a>
                         </div>
                     </div>
                     {% endfor %}
 
                 </div>
             </div>
-            </div>
-
-            <!-- ACCORDEON 
-                <div class="panel-group" id="accordion">
-                {% for task in task_list %}
-                <div class="panel panel-default">
-                <div class="panel-heading">
-                <h4 class="panel-title">
-                <a data-toggle="collapse" data-parent="#accordion" href="#{{task.id}}">
-                {{task.id}}</a>
-                </h4>
-                </div>
-
-                <div id="{{task.id}}" class="panel-collapse collapse">
-                <div class="panel-body">
-                <form>
-                <div class="form-group row">
-                <div class="col-sm-5">
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <div class="col-sm-5">
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <div class="col-sm-5">
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <label class="col-sm-3 form-control-label" for="task">Task:</label>
-                <div class="col-sm-5">
-                <select class="form-control c-select">
-                {% for s in scripts %}
-                {% if task.task == s %}
-                <option selected>{{s}}</option>
-                {% else %}
-                <option value="{{s}}">{{s}}</option>
-                {% endif %}
-                {% endfor %}
-                </select>
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <label class="col-sm-3 form-control-label" for="interval">Interval:</label>
-                <div class="col-sm-5">
-                <input class="form-control" type="text" id="interval" value="{{task.interval}}"></input>
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <label for="disks" class="col-sm-3 form-control-label" >Disks:</label>
-                <div class="col-sm-5">
-                <input class="form-control" type="text" id="disks" value="{{task.disks}}"></input>
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <label class="col-sm-3 form-control-label" for="db_host">Graphite Host:</label>
-                <div class="col-sm-5">
-                <input class="form-control" type="text" id="db_host" value="{{task.db_host}}"></input>
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <label class="col-sm-3 form-control-label" for="db_port">Graphite Port:</label>
-                <div class="col-sm-5">
-                <input class="form-control" type="text" id="db_port" value="{{task.db_port}}"></input>
-                </div>
-                </div>
-
-                <div class="form-group row">
-                <label class="col-sm-3 form-control-label" for="path">Graphite path:</label>
-                <div class="col-sm-5">
-                <input class="form-control" type="text" id="path" value="{{task.path}}"></input>
-                </div>
-                </div>
-
-                <div style="btn-toolbox">
-                <button type="button" class="btn btn-success">Update</button>
-                <button type="button" type="submit" formaction="task/{{task.id}}" class="btn btn-danger">Delete</button>
-                </div>
-                </form>
-                </div>
-                </div>
-                </div>
-                {% endfor %}
-                </div> -->
-                </div>
-
-
+        </div>
     </body>
 </html>
 

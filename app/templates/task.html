@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>ssh-monitor</title>
+    </head>
+    <body>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+        <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="/">ssh-monitor</a>
+                    </div>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="">Add Task</a></li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </nav>
+
+            <div class="row">
+                <div class="container">
+
+                    <form action="" method="post">
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="id">{{form.id.label}}</label>
+                            <div class="col-sm-5">
+                                {{form.id(class_="form-control")}}
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="task">Task:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="interval" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="task">Task:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="interval" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="task">Task:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="interval" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="task">Task:</label>
+                            <div class="col-sm-5">
+                                <select class="form-control c-select">
+                                    {% for s in scripts %}
+                                    <option value="{{s}}">{{s}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="interval">Interval:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="interval" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="disks" class="col-sm-3 form-control-label" >Disks:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="disks" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="db_host">Graphite Host:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="db_host" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="db_port">Graphite Port:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="db_port" ></input>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 form-control-label" for="path">Graphite path:</label>
+                            <div class="col-sm-5">
+                                <input class="form-control" type="text" id="path"></input>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-offset-7">
+                        <div style="btn-toolbox">
+                            <button type="button" class="btn btn-primary">Add Task</button>
+                        </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

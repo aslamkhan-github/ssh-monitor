@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired
 
 
 class TaskForm(Form):
+    id = StringField('ID', validators=[DataRequired()])
     host = StringField('Host', validators=[DataRequired()])
     user = StringField('User', validators=[DataRequired()])
     passwd = StringField('Pass', validators=[DataRequired()])
