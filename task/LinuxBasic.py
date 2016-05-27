@@ -38,6 +38,10 @@ class LinuxBasic:
     def execute(self):
         if not self.connect():
             return
-        self.cpu.execute(self.session)
-        self.mem.execute(self.session)
-        self.disk.execute(self.session)
+        try:
+            self.cpu.execute(self.session)
+            self.mem.execute(self.session)
+            self.disk.execute(self.session)
+        except:
+            logger.exception("ICEBasic raised exception:")
+            self.session = None
