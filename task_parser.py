@@ -74,7 +74,7 @@ class TaskParser:
             t.db_port = v['db_port']
             t.path = v['path']
             if 'port' in v:
-                self.port = int(v['port'])
+                t.port = int(v['port'])
         except:
             logger.exception('Invalid file format in %s', id)
             sys.exit(1)
