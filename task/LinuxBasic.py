@@ -43,5 +43,5 @@ class LinuxBasic:
             self.mem.execute(self.session)
             self.disk.execute(self.session)
         except:
-            logger.exception("ICEBasic raised exception:")
+            logger.exception("LinuxBasic raised exception on %s:", self.task.id)
             self.session = None

@@ -24,6 +24,7 @@ class Task:
         self.db_host = ''
         self.db_port = 0
         self.path = ''
+        self.process = []
 
     def __repr__(self):
         return 'Task(id: {}, host: {}, user: {}, pass: {}, interval: {} \
@@ -55,10 +56,14 @@ class TaskParser:
         self.task_list = []
         file_list = [join(self.dir, f)
                      for f in listdir(self.dir) if f.endswith('.yml')]
+
         for f in file_list:
             with open(f, 'r') as stream:
                 v = yaml.load(stream)
-                self.task_list.append(self.createTask(f, v))
+                t = self.createTask(f, v)
+                if t:
+                    self.task_list.append(t)
+
         return self.task_list
 
     def createTask(self, id, v):
@@ -69,15 +74,18 @@ class TaskParser:
             t.task = v['task']
             t.passwd = v['pass']
             t.interval = v['interval']
-            t.disks = list(v['disks'])
+            if 'disks' in v:
+                t.disks = list(v['disks'])
             t.db_host = v['db_host']
             t.db_port = v['db_port']
             t.path = v['path']
             if 'port' in v:
                 t.port = int(v['port'])
+            if 'process' in v:
+                t.process = v['process']
         except:
-            logger.exception('Invalid file format in %s', id)
-            sys.exit(1)
+            logger.exception('Invalid file format in %s.yml', id)
+            return None
 
         return t
 
