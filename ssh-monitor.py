@@ -75,6 +75,11 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
         logger.info("File deleted: %s", event.src_path)
         self.scheduler.remove_job(id)
 
+    def on_moved(self, event):
+        id = os.path.basename(event.src_path).replace('.yml', '')
+        logger.info("File moved: %s", event.src_path)
+        self.scheduler.remove_job(id)
+
     def on_created(self, event):
         self.parser.parse()
         id = os.path.basename(event.src_path).replace('.yml', '')

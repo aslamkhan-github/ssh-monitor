@@ -1,31 +1,71 @@
-import BaseSSHTask
 import logging
 import time
 import pickle
 import struct
+from datetime import datetime, timedelta
 
-from SShUtil import SendGraphitePayload
+from SShUtil import CreateSshSession, SendGraphitePayload
 
 logger = logging.getLogger(__name__)
 
 
-class LinuxProcessMonitoring(BaseSSHTask):
+class LinuxProcessMonitoring:
 
-    def _validateTask(self):
-        if len(self.task.process) < 1:
-            logger.warning("No process name provided, task will not execute")
-            return False
+    def __init__(self, task):
+        self.destination = (task.db_host, task.db_port)
+        self.session = None
+        self.last_connection = None
+        self.task = task
+        self.pid = 0
+        self.path = self.task.path + '.process'
+        self.current = ''
 
-        return True
+    def connect(self):
+        # Check if already connected
+        if self.session:
+            # Expire session
+            if datetime.now() - self.last_connection > timedelta(hours=1):
+                self.session.close()
+            else:
+                # Keep session alive
+                return True
 
-    def _updateValuePath(self):
-        self.task.path = self.task.path + '.process'
+        self.session = CreateSshSession(self.task)
+        self.last_connection = datetime.now()
+        return (self.session is not None)
+
+    def execute(self, session):
+        if session:
+            # Use external session
+            self._execute(session)
+        else:
+            if not self.connect():
+                return
+
+            self._execute(self.session)
 
     def _execute(self, session):
         for p in self.task.process:
-            session.execute(
-                'top -n 1 -p $(pgrep {}) | grep {}'.format(p, p),
+            self.current = p
+            # First get the pid
+            cmd = 'ps -aux | grep {} | grep -v grep'.format(p)
+            pid = session.execute(cmd, on_stdout=self.on_pid_output)
+            pid.wait()  # Wait until we have the pid
+            # Get top information
+            pid = session.execute(
+                'top -b -n 1 -p {} | grep {}'.format(self.pid, self.pid),
                 on_stdout=self.on_output)
+            pid.wait()
+
+    def on_pid_output(self, task, line):
+        if not line:
+            return
+
+        out = line.split()
+        if len(out) < 2:
+            return
+
+        self.pid = out[1]
 
     def on_output(self, task, line):
         # pid  user                                       CPU  MEM
@@ -33,15 +73,14 @@ class LinuxProcessMonitoring(BaseSSHTask):
         if not line:
             return
 
-        if 'unknown option' in line:
-            logger.error('Invalid process name, more than one value returned')
+        if 'unknown option' in line or 'TERM' in line:
+            logger.error(line)
             return
 
         now = int(time.time())
         out = line.split()
 
-        process = out[-1].replace('/', '_')
-        path = self.task.path + process
+        path = self.path + "." + self.current.replace('/', '_').replace('.', '_')
         mem = (path + '.memory_percent', (now, out[-3]))
         cpu = (path + '.cpu_percent', (now, out[-4]))
 
