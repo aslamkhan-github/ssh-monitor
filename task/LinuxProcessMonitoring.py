@@ -46,16 +46,20 @@ class LinuxProcessMonitoring:
 
     def _execute(self, session):
         for p in self.task.process:
-            self.current = p
-            # First get the pid
-            cmd = 'ps -aux | grep {} | grep -v grep'.format(p)
-            pid = session.execute(cmd, on_stdout=self.on_pid_output)
-            pid.wait()  # Wait until we have the pid
-            # Get top information
-            pid = session.execute(
-                'top -b -n 1 -p {} | grep {}'.format(self.pid, self.pid),
-                on_stdout=self.on_output)
-            pid.wait()
+            try:
+                self.current = p
+                # First get the pid
+                cmd = 'ps aux | grep {} | grep -v grep'.format(p)
+                pid = session.execute(cmd, on_stdout=self.on_pid_output,
+                                      output_timeout=3)
+                pid.wait()  # Wait until we have the pid
+                # Get top information
+                pid = session.execute(
+                    'top -b -n 1 -p {} | grep {}'.format(self.pid, self.pid),
+                    on_stdout=self.on_output, output_timeout=3)
+                pid.wait()
+            except:
+                logger.exception("[%s] Error ProcessMonitoring: %s (%s)", self.task.id, p, self.pid)
 
     def on_pid_output(self, task, line):
         if not line:
@@ -63,6 +67,13 @@ class LinuxProcessMonitoring:
 
         out = line.split()
         if len(out) < 2:
+            return
+        # Verify that pid is a number
+        try:
+            pid = int(out[1])
+        except:
+            logger.error("[%s] Invalid PID: %s", self.task.id, out[1])
+            logger.error(line)
             return
 
         self.pid = out[1]
