@@ -105,6 +105,9 @@ def main(args):
     # Initial parsing of the task folder
     for t in taskparser.task_list:
         addJob(t, scheduler)
+        # Spread tasks from each other to prevent overload/task miss
+        time.sleep(1)
+
     scheduler.start()
 
     # Update jobs while running
