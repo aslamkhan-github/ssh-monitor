@@ -9,7 +9,7 @@ from SShUtil import CreateSshSession, SendGraphitePayload
 logger = logging.getLogger(__name__)
 
 
-class LinuxProcessMonitoring:
+class LinuxThreadMonitoring:
 
     def __init__(self, task):
         self.destination = (task.db_host, task.db_port)
@@ -45,32 +45,35 @@ class LinuxProcessMonitoring:
             self._execute(self.session)
 
     def _execute(self, session):
-        for p in self.task.process:
+        if not self.task.thread:
+            return
+
+        for p in self.task.thread:
             try:
                 self.current = p
                 # First get the pid
-                cmd = 'ps aux | grep {} | grep -v grep'.format(p)
+                cmd = 'ps aux | grep {} | grep -v grep'.format(self.current['process'])
                 pid = session.execute(cmd, on_stdout=self.on_pid_output,
                                       output_timeout=3)
 
                 # Wait until we have the pid
                 pid.wait(raise_if_error=False)
                 if pid.error():
-                    logger.error("[%s] Error ProcessMonitoring: %s (%s) : %s", self.task.id, p, self.pid,
+                    logger.error("[%s] Error ThreadMonitoring #1: %s (%s) : %s", self.task.id, p, self.pid,
                                  pid.error())
 
-                # Get top information
-                pid = session.execute(
-                    'top -b -n 1 -p {} | grep {}'.format(self.pid, self.pid),
-                    on_stdout=self.on_output, output_timeout=3)
-
-                pid.wait(raise_if_error=False)
-                if pid.error():
-                    logger.error("[%s] Error ProcessMonitoring: %s (%s) : %s", self.task.id, p, self.pid,
-                                 pid.error())
+                for t in self.current['thread']:
+                    # Get top information
+                    cmd = 'COLUMNS=1000 top -H -b -n 1 -p {} | grep {}'.format(self.pid, t)
+                    pid = session.execute(cmd,
+                        on_stdout=self.on_output, on_stderr=self.on_error)
+                    pid.wait(raise_if_error=False)
+                    if pid.error():
+                        logger.error("[%s] Error ThreadMonitoring #2: %s (%s) : %s", self.task.id, t, self.pid,
+                                    pid.error())
 
             except:
-                logger.exception("[%s] Exception ProcessMonitoring: %s (%s)", self.task.id, p, self.pid)
+                logger.exception("[%s] Exception ThreadMonitoring: %s (%s)", self.task.id, p, self.pid)
 
     def on_pid_output(self, task, line):
         if not line:
@@ -82,12 +85,17 @@ class LinuxProcessMonitoring:
         # Verify that pid is a number
         try:
             pid = int(out[1])
+            if pid == 0:
+                raise Exception()
         except:
             logger.error("[%s] Invalid PID: %s", self.task.id, out[1])
             logger.error(line)
             return
 
         self.pid = out[1]
+
+    def on_error(self, task, line):
+        logger.error(line)
 
     def on_output(self, task, line):
         # pid  user                                       CPU  MEM
@@ -102,7 +110,7 @@ class LinuxProcessMonitoring:
         now = int(time.time())
         out = line.split()
 
-        path = self.path + "." + self.current.replace('/', '_').replace('.', '_')
+        path = self.path + "." + self.current['process'].replace('/', '_').replace('.', '_') + ".thread." + out[-1]
         mem = (path + '.memory_percent', (now, out[-3]))
         cpu = (path + '.cpu_percent', (now, out[-4]))
 

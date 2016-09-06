@@ -1,7 +1,6 @@
 import unittest
 import logging
 import yaml
-import sys
 
 from os import listdir, path
 from os.path import join, basename
@@ -25,6 +24,7 @@ class Task:
         self.db_port = 0
         self.path = ''
         self.process = []
+        self.thread = None
 
     def __repr__(self):
         return 'Task(id: {}, host: {}, user: {}, pass: {}, interval: {} \
@@ -83,6 +83,8 @@ class TaskParser:
                 t.port = int(v['port'])
             if 'process' in v:
                 t.process = v['process']
+            if 'thread' in v:
+                t.thread = v['thread']
         except:
             logger.exception('Invalid file format in %s.yml', id)
             return None

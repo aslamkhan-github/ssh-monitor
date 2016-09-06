@@ -4,6 +4,7 @@ import LinuxCpuAverage
 import ICEMemoryUsage
 import LinuxDiskUsage
 import LinuxProcessMonitoring
+import LinuxThreadMonitoring
 from SShUtil import CreateSshSession
 
 # logging.basicConfig(level=logging.INFO)
@@ -20,6 +21,7 @@ class ICEBasic:
         self.mem = ICEMemoryUsage.ICEMemoryUsage(task)
         self.disk = LinuxDiskUsage.LinuxDiskUsage(task)
         self.process = LinuxProcessMonitoring.LinuxProcessMonitoring(task)
+        self.thread = LinuxThreadMonitoring.LinuxThreadMonitoring(task)
         self.session = None
         self.last_connection = None
 
@@ -45,6 +47,7 @@ class ICEBasic:
             self.mem.execute(self.session)
             self.disk.execute(self.session)
             self.process.execute(self.session)
+            self.thread.execute(self.session)
         except:
             logger.exception("ICEBasic raised exception on %s:", self.task.id)
             self.session = None
