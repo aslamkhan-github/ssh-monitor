@@ -14,7 +14,7 @@ def CreateSshSession(task):
         session = SshSession(conn, auto_close=False)
         logger.info("New SSH session: %s", task.host)
     except:
-        logger.error("Could not connect to : %s", task.host)
+        logger.exception("Could not connect to : %s", task.host)
         return None
 
     return session
@@ -27,7 +27,7 @@ def SendGraphitePayload(destination, header, payload):
         sock.sendall(header)
         sock.sendall(payload)
     except:
-        logging.error("Could not reach graphite database at: %s",
+        logging.exception("Could not reach graphite database at: %s",
                       destination)
         return False
 
