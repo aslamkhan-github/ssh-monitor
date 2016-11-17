@@ -28,10 +28,14 @@
                     </div>
 
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="{{ url_for('task') }}">Add Task</a></li>
+                        <li><a href="{{ url_for('log') }}">Logs</a></li>
                     </ul>
                 </div><!-- /.navbar-collapse -->
             </nav>
+
+            <form action="task">
+                <input type="submit" class="btn btn-primary" value="Add Task"/>
+            </form>
 
             <div class="row">
                 <div class="container">
@@ -42,7 +46,7 @@
                     {% for task in task_list %}
                     <div class="col-sm-4">
                         <div class="thumbnail">
-                            <a class="close" href="delete/{{task.id}}">×</a>
+                            <a class="close" href="disable/{{task.id}}">×</a>
                             <a href="task/{{task.id}}" style="color: #333;text-decoration:none">
                                 <div>
                                     <h3>{{task.id}}</h3>
@@ -53,10 +57,29 @@
                     </div>
                     {% endfor %}
 
+                    <div class="col-md-12">
+                        <h1 class="page-header">Inactives</h1>
+                    </div>
+
+                    {% for inact in inactives %}
+                    <div class="col-sm-4">
+                        <div class="thumbnail">
+                            <a class="close" href="delete/{{inact}}">×</a>
+                            <a href="inactive/{{inact}}" style="color: #333;text-decoration:none">
+                                <div>
+                                    <h3>{{inact}}</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+
+
                 </div>
             </div>
         </div>
-    </body>
-</html>
+        </body>
+        </html>
 
 

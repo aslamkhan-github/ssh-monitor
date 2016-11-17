@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+<title>ssh-monitor</title>
+</head>
+<body>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<!-- Latest compiled JavaScript -->
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+
+<style>
+textarea { width : 100%; min-height : 600px; resize : None; }
+</style>
+
+<div class="container">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/">ssh-monitor</a>
+            </div>
+
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="{{ url_for('log') }}">Logs</a></li>
+            </ul>
+
+        </div><!-- /.navbar-collapse -->
+    </nav>
+
+    <form action="" method="POST">
+        <div class="form-group form-inline">
+            <label for="id-text">ID: </label>
+            <input name="id" type="text" class="form-control" id="id-text" placeholder="">
+        </div>
+        <textarea class=form-control name="text" >{{task}}</textarea>
+        <input type="submit" class="btn btn-primary" value="Save"/>
+    </form>
+
+
+</div>
+            </div>
+        </div>
+    </body>
+</html>
+
+
