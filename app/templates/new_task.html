@@ -17,10 +17,20 @@
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+
+<script>
+function validateForm() {
+        var x = document.forms["myForm"]["id"].value;
+        if (x == "") {
+            alert("You must provide an ID!");
+            return false;
+        }
+}
+</script>
 
 <style>
 textarea { width : 100%; min-height : 600px; resize : None; }
+.top10 { margin-top:10px }
 </style>
 
 <div class="container">
@@ -38,13 +48,13 @@ textarea { width : 100%; min-height : 600px; resize : None; }
         </div><!-- /.navbar-collapse -->
     </nav>
 
-    <form action="" method="POST">
+    <form name="myForm" action="" method="POST" onsubmit="return validateForm()" >
         <div class="form-group form-inline">
             <label for="id-text">ID: </label>
-            <input name="id" type="text" class="form-control" id="id-text" placeholder="">
+            <input name="id" type="text" class="form-control" id="id-text">
         </div>
         <textarea class=form-control name="text" >{{task}}</textarea>
-        <input type="submit" class="btn btn-primary" value="Save"/>
+        <input type="submit" class="btn btn-primary top10" value="Save"/>
     </form>
 
 

@@ -24,8 +24,8 @@ class FileModel:
         shutil.move(path, os.path.join(TASK_DIR, id))
 
     def delete(self, id):
-        path = self.get_fullpath(id)
-        shutil.move(path, os.path.join(TASK_DIR, id))
+        path = os.path.join(TASK_DIR, id)
+        os.remove(path)
 
     def get_task(self, id):
         path = self.get_fullpath(id)

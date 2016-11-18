@@ -8,9 +8,13 @@ from filemodel import FileModel
 @app.route('/')
 def index():
     model = FileModel()
+    task_list = model.get_all_task()
+    task_list.sort(key=lambda x: x.host)
+    inactives = model.get_all_inactives()
+    inactives.sort()
     return render_template('index.html',
-                           task_list=model.get_all_task(),
-                           inactives=model.get_all_inactives())
+                           task_list=task_list,
+                           inactives=inactives)
 
 
 @app.route('/log')
@@ -34,7 +38,7 @@ def add_task():
     id = request.form['id']
     model = FileModel()
     model.update(id, text)
-    return redirect(url_for('task', id=id))
+    return redirect(url_for('index'))
 
 
 @app.route('/task/<id>')
@@ -68,7 +72,14 @@ def update(id):
 
 
 @app.route('/disable/<id>')
-def delete(id):
+def disable(id):
     model = FileModel()
     model.disable(id)
+    return redirect(url_for('index'))
+
+
+@app.route('/delete/<id>')
+def delete(id):
+    model = FileModel()
+    model.delete(id)
     return redirect(url_for('index'))

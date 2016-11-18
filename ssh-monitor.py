@@ -58,7 +58,7 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
     def on_modified(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("File modified: %s", event.src_path)
+        logger.warning("File modified: %s", event.src_path)
         try:
             self.scheduler.remove_job(id)
         except:
@@ -72,18 +72,27 @@ class YmlFileEventHandler(PatternMatchingEventHandler):
 
     def on_deleted(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("File deleted: %s", event.src_path)
+        logger.warning("File deleted: %s", event.src_path)
         self.scheduler.remove_job(id)
 
     def on_moved(self, event):
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("File moved: %s", event.src_path)
-        self.scheduler.remove_job(id)
+        logger.warning("File moved: %s", event.src_path)
+
+        if os.path.exists(event.src_path + '.yml'):
+            # New job
+            task = filter(lambda x: x.id == id, self.parser.task_list)
+            if len(task) == 0:
+                logging.error("Could not find task with ID: %s", id)
+            addJob(task[0], self.scheduler)
+        else:
+            # Remove rob
+            self.scheduler.remove_job(id)
 
     def on_created(self, event):
         self.parser.parse()
         id = os.path.basename(event.src_path).replace('.yml', '')
-        logger.info("File added: %s", event.src_path)
+        logger.warning("File added: %s", event.src_path)
         task = filter(lambda x: x.id == id, self.parser.task_list)
         if len(task) == 0:
             logging.error("Could not find task with ID: %s", id)
