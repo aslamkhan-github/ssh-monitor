@@ -1,9 +1,10 @@
 import logging
-import time
 import pickle
 import struct
-import traceback
+import time
 from datetime import datetime, timedelta
+
+import traceback
 from SShUtil import CreateSshSession, SendGraphitePayload
 
 # logging.basicConfig(level=logging.INFO)
@@ -11,13 +12,13 @@ from SShUtil import CreateSshSession, SendGraphitePayload
 logger = logging.getLogger(__name__)
 
 
-class LinuxMemoryUsage:
+class ICEMemoryUsage:
 
     def __init__(self, task):
         self.destination = (task.db_host, task.db_port)
-        self.task = task
-        self.last_connection = None
         self.session = None
+        self.last_connection = None
+        self.task = task
 
     def connect(self):
         # Check if already connected
@@ -38,10 +39,9 @@ class LinuxMemoryUsage:
         out = line.split()
 
         try:
-            total = int(out[-1]) + int(out[-2])
             free = (self.task.path + '.memory.free', (now, out[-1]))
-            used = (self.task.path + '.memory.used', (now, out[-2]))
-            total = (self.task.path + '.memory.total', (now, total))
+            used = (self.task.path + '.memory.used', (now, out[2]))
+            total = (self.task.path + '.memory.total', (now, out[1]))
 
             payload = pickle.dumps([free, used, total], protocol=2)
             header = struct.pack("!L", len(payload))
@@ -70,15 +70,16 @@ class LinuxMemoryUsage:
         except:
             logger.error(traceback.format_exc)
 
-    def execute(self, session=None):
+    def execute(self, session):
         if session:
             # Use external session
-            session.execute('free -m | grep +', on_stdout=self.on_output)
+            session.execute('free -m | grep Mem', on_stdout=self.on_output)
             session.execute('free -m | grep Swap',
-                             on_stdout=self.on_swap_output)
+                                on_stdout=self.on_swap_output)
         else:
             if not self.connect():
                 return
-            self.session.execute('free -m | grep +', on_stdout=self.on_output)
+
+            self.session.execute('free -m | grep Mem', on_stdout=self.on_output)
             self.session.execute('free -m | grep Swap',
-                             on_stdout=self.on_swap_output)
+                                on_stdout=self.on_swap_output)

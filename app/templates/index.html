@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+        <title>ssh-monitor</title>
+    </head>
+    <body>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/css/bootstrap-select.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.10.0/js/bootstrap-select.min.js"></script>
+
+        <div class="container">
+            <nav class="navbar navbar-default">
+                <div class="container-fluid">
+                    <!-- Brand and toggle get grouped for better mobile display -->
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="/">ssh-monitor</a>
+                    </div>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="{{ url_for('log') }}">Logs</a></li>
+                    </ul>
+                </div><!-- /.navbar-collapse -->
+            </nav>
+
+            <form action="task">
+                <input type="submit" class="btn btn-primary" value="Add Task"/>
+            </form>
+
+            <div class="row">
+                <div class="container">
+                    <div class="col-md-12">
+                        <h1 class="page-header">Task list</h1>
+                    </div>
+
+                    {% for task in task_list %}
+                    <div class="col-sm-4">
+                        <div class="thumbnail">
+                            <a class="close" href="disable/{{task.id}}">×</a>
+                            <a href="task/{{task.id}}" style="color: #333;text-decoration:none">
+                                <div>
+                                    <h3>{{task.id}}</h3>
+                                    <p>{{task.host}}</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="col-md-12">
+                        <h1 class="page-header">Inactives</h1>
+                    </div>
+
+                    {% for inact in inactives %}
+                    <div class="col-sm-4">
+                        <div class="thumbnail">
+                            <a class="close" href="delete/{{inact}}">×</a>
+                            <a href="inactive/{{inact}}" style="color: #333;text-decoration:none">
+                                <div>
+                                    <h3>{{inact}}</h3>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+
+
+                </div>
+            </div>
+        </div>
+        </body>
+        </html>
+
+
