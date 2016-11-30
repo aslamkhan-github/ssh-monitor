@@ -2,8 +2,8 @@ import os
 from task_parser import TaskParser
 import shutil
 
-TASK_DIR = 'task_dir/'
-SCRIPT_DIR = 'task/'
+TASK_DIR = '/opt/src/ssh-monitor/task_dir/'
+SCRIPT_DIR = '/opt/src/ssh-monitor/task/'
 
 
 class FileModel:
@@ -53,3 +53,8 @@ class FileModel:
     def update(self, id, text):
         with open(self.get_fullpath(id), 'w') as f:
             f.write(text)
+
+    def get_log(self):
+        with open('/mnt/data/supervisor/ssh-monitor.log', 'r') as f:
+            log = f.read()
+        return log

@@ -19,9 +19,8 @@ def index():
 
 @app.route('/log')
 def log():
-    with open('/mnt/data/supervisor/ssh-monitor.log', 'r') as f:
-        log = f.read()
-
+    model = FileModel()
+    log = model.get_log()
     return render_template('log.html', log=log)
 
 

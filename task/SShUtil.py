@@ -14,7 +14,7 @@ def CreateSshSession(task):
         session = SshSession(conn, auto_close=False)
         logger.info("New SSH session: %s", task.host)
     except:
-        logger.exception("Could not connect to : %s", task.host)
+        logger.exception("[%s] Could not connect to : %s", task.id, task.host)
         return None
 
     return session
