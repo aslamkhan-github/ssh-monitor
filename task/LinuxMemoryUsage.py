@@ -10,7 +10,7 @@ from SShUtil import CreateSshSession, SendGraphitePayload
 # logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-
+# Physical Memory
 class LinuxMemoryUsage:
 
     def __init__(self, task):
@@ -32,7 +32,7 @@ class LinuxMemoryUsage:
         self.session = CreateSshSession(self.task)
         self.last_connection = datetime.now()
         return (self.session is not None)
-
+     
     def on_output(self, task, line):
         now = int(time.time())
         out = line.split()
@@ -51,7 +51,8 @@ class LinuxMemoryUsage:
 
         except:
             logger.error(traceback.format_exc)
-
+    
+    #SWAP MEMORY
     def on_swap_output(self, tak, line):
         now = int(time.time())
         out = line.split()
